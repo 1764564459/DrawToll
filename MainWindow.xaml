@@ -1,0 +1,15 @@
+﻿<Window x:Class="DrawTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DrawTool"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Label Content="..." Name="Lab" HorizontalAlignment="Left" Margin="544,177,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.467,-0.235"/>
+        <TextBox HorizontalAlignment="Left"   Margin="419,180,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Button Content="Button" Click="Open_File" HorizontalAlignment="Left" Margin="609,180,0,0" VerticalAlignment="Top"/>
+
+    </Grid>
+</Window>
