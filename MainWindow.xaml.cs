@@ -24,6 +24,7 @@ namespace DrawTool
     /// </summary>
     public partial class MainWindow : Window
     {
+        private string _selectFile = string.Empty;
         public  MainWindow()
         {
             InitializeComponent();
@@ -45,28 +46,16 @@ namespace DrawTool
             var Result= dialog.ShowDialog();
             if(Result== CommonFileDialogResult.Ok)
             {
-                this.Lab.Content= dialog.FileName;
+               
                 var deskFile = dialog.FileName;
-                var path = System.IO.Path.GetDirectoryName(deskFile);
-                SetFileRole(path);
-                //复制JQuery
-                var result=  CopyJquery(path);
-                
-                //创建Js
-                result= CreateDrawJs(path,deskFile);
-                if (result != null)//创建Js、复制JQuery失败
-                {
-                    MessageBox.Show(result);
-                    //提示信息
-                    return;
-                }
+               
                 if (!deskFile.Any())
                 {
                     MessageBox.Show("未选择任何文件！！！");
                     //提示信息
                     return;
                 }
-               
+                _selectFile = deskFile;
             }
         }
 
@@ -75,7 +64,7 @@ namespace DrawTool
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private string CreateDrawJs(string path,string filePath)
+        private string CreateDrawJs(string path,string filePath,string setName="Button")
         {
             try
             {
@@ -85,7 +74,7 @@ namespace DrawTool
                                + "var _div= document.getElementsByTagName(\"div\");"
                                + "for(var i=0;i<_div.length;i++)"
                                + "{"
-                               + "    if($(_div[i]).text()==\"Button\")"
+                               + $"    if($(_div[i]).text()==\"{setName}\")"
                                + "    {"
                                    + "  _div[i].onclick=function(e)" +
                                        "{"
@@ -200,6 +189,31 @@ namespace DrawTool
                     ("Everyone", FileSystemRights.FullControl,
                     AccessControlType.Allow));
             fi.SetAccessControl(fileSecurity);
+        }
+
+        /// <summary>
+        /// 写入配置
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Write_Setting(object sender, RoutedEventArgs e)
+        {
+            var path = System.IO.Path.GetDirectoryName(_selectFile);
+            SetFileRole(path);
+            //复制JQuery
+            var result = CopyJquery(path);
+
+            var setName = this.setName.Text;
+            if (string.IsNullOrWhiteSpace(setName)) setName = "Button";
+            //创建Js
+            result = CreateDrawJs(path, _selectFile,setName);
+            if (result != null)//创建Js、复制JQuery失败
+            {
+                MessageBox.Show(result);
+                //提示信息
+                return;
+            }
+            MessageBox.Show("配置成功！！！");
         }
     }
 }

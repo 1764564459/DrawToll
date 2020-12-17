@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DrawTool"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="350" Width="500">
     <Grid>
-        <Label Content="..." Name="Lab" HorizontalAlignment="Left" Margin="544,177,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.467,-0.235"/>
-        <TextBox HorizontalAlignment="Left"   Margin="419,180,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-        <Button Content="Button" Click="Open_File" HorizontalAlignment="Left" Margin="609,180,0,0" VerticalAlignment="Top"/>
-
+        <Label Content="按钮名称：" HorizontalAlignment="Left" Margin="189,95,0,0" VerticalAlignment="Top"/>
+        <TextBox HorizontalAlignment="Left" Name="setName"  Margin="255,99,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Button Content="文件..." Click="Open_File" HorizontalAlignment="Left" Margin="382,98,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.878,0.501"/>
+        <Button Content="开始配置" Click="Write_Setting" HorizontalAlignment="Left" Margin="363,252,0,0" VerticalAlignment="Top" Width="58" Height="24"/>
     </Grid>
 </Window>
