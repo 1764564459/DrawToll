@@ -64,41 +64,32 @@ namespace DrawTool
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private string CreateDrawJs(string path,string filePath,string setName="Button")
+        private string CreateDrawJs(string path,string filePath,string setName="#Button")
         {
             try
             {
-                string html = "document.onmousemove=function(e,t)"
-                           + "{"
-                               + "var _bRst=false;"
-                               + "var _div= document.getElementsByTagName(\"div\");"
-                               + "for(var i=0;i<_div.length;i++)"
-                               + "{"
-                               + $"    if($(_div[i]).text()==\"{setName}\")"
-                               + "    {"
-                                   + "  _div[i].onclick=function(e)" +
-                                       "{"
-                                       + "	  if(_bRst)"
-                                       + "	   return true;"
-                                       + "	   debugger;"
-                                       + "	   console.log($(e));"
-                                       + "	_bRst=true;"
-                                   + "}"
-                               + "   }"
-                             + "}"
-                           + "}";
+                //创建Draw.js
+                if (File.Exists(@$"{path}\Draw.js"))
+                    File.Delete(@$"{path}\Draw.js");
                 var drawJs = File.Create(@$"{path}\Draw.js");
+
+                //设置文件访问权限
                 SetFileAccess(@$"{path}\Draw.js");
-                byte[] _byte = Encoding.UTF8.GetBytes(html);
-                drawJs.Write(_byte, 0, html.Length);
-
-                SetFileAccess(filePath);
-                FileStream file = new FileStream(filePath,FileMode.Append );// File.OpenWrite(filePath);
-                _byte = Encoding.UTF8.GetBytes("<script type=\"text/javascript\" src=\"./jquery.js \"></script> \r\n<script type=\"text/javascript\" src=\"./Draw.js \"></script>");
-                file.Write(_byte, 0, _byte.Length);
-
                 drawJs.Close();
                 drawJs.Dispose();
+                //写入js
+                WriteDrawJs(path);
+
+                //绑定需要绑的事件 
+                BindClickEvent(path, setName);
+
+                //设置html访问权限
+                SetFileAccess(filePath);
+                FileStream file = new FileStream(filePath,FileMode.Append );// File.OpenWrite(filePath);
+                byte[] _byte = Encoding.UTF8.GetBytes("<script type=\"text/javascript\" src=\"./jquery.js \"></script> \r\n<script type=\"text/javascript\" src=\"./Draw.js \"></script>");
+                file.Write(_byte, 0, _byte.Length);
+
+               
                 file.Close();
                 file.Dispose();
                 return null;
@@ -107,6 +98,84 @@ namespace DrawTool
             {
                 return ex.Message;
             }
+        }
+
+        /// <summary>
+        /// 绑定事件
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="element"></param>
+        private void BindClickEvent(string filePath,string element)
+        {
+            string[] _arr = element.Split(',');
+            string _events = string.Empty;
+            foreach (var item in _arr)
+            {
+                _events += @"  
+                             var _elem=document.getElementById('"+item+ @"')
+                             if(_elem==null) return true;
+                             _elem.onclick=function (e) {
+                                        if(_bRst) return true;
+                                        
+                                        console.log('123')
+                                       _bRst=true;
+                              }  ";
+            }
+            string _event = @" 
+                                document.onmousemove=function(e,f)
+                                {
+                                    
+                                    var _bRst=false;
+                                   " + _events+@"
+                                } ";
+            FileStream file = new FileStream(@$"{filePath}\Draw.js", FileMode.Append);
+            byte[] _byte = Encoding.UTF8.GetBytes(_event);
+            file.Write(_byte, 0, _byte.Length);
+            file.Close();
+            file.Dispose();
+        }
+
+        /// <summary>
+        /// 写入Js
+        /// </summary>
+        /// <param name="filePath"></param>
+        private void WriteDrawJs(string filePath)
+        {
+            string html= @"
+                            var _idArr = [];
+                            $('body').contents().find('text,div,span').each(function () {
+                                var isBindedId = $(this).attr('isBindedId');
+                                if (!!isBindedId && isBindedId == 'True')
+                                {
+                                    _idArr.push($(this).attr('id'));
+                                    return true;
+                                }
+                                 var curObjId = $(this).html().replace(/\s+/g, '');
+                                 //验证ID是否正确
+                                if (curObjId == undefined || curObjId == '')
+                                    return true;
+                                var tempArr = curObjId.split('_');
+                                //if (tempArr.length < 2) return true;
+                                $(this).attr('id', curObjId);
+                                $(this).attr('isBindedId', 'True');
+                                _idArr.push(curObjId);
+                            });
+                        var _data = { water: '122', gas: '123', heat: '45621', fast: 125 };
+                        BindData(_data);
+                        function BindData(data)
+                        {
+                            $.each(data, function (index, item) {
+                                var current = $('body').contents().find('#' + index);
+                                if (current != null && current != 'undefined') {
+                                    current[0].textContent=item;
+                                }
+                            });
+                        } ";
+            FileStream file = new FileStream(@$"{filePath}\Draw.js", FileMode.Append);
+            byte[] _byte = Encoding.UTF8.GetBytes(html);
+            file.Write(_byte, 0, _byte.Length);
+            file.Close();
+            file.Dispose();
         }
 
 
@@ -122,6 +191,9 @@ namespace DrawTool
                 var path = $@"{(System.IO.Path.GetDirectoryName(typeof(MainWindow).Assembly.Location))}\wwwroot\jquery.js";
                 if (File.Exists(path))
                 {
+                    if (File.Exists($"{address}/jquery.js"))
+                        File.Delete($"{address}/jquery.js");
+
                     File.Copy(path, $"{address}/jquery.js");
                 }
                 return null;
@@ -204,7 +276,7 @@ namespace DrawTool
             var result = CopyJquery(path);
 
             var setName = this.setName.Text;
-            if (string.IsNullOrWhiteSpace(setName)) setName = "Button";
+            if (string.IsNullOrWhiteSpace(setName)) setName = "#Button";
             //创建Js
             result = CreateDrawJs(path, _selectFile,setName);
             if (result != null)//创建Js、复制JQuery失败
