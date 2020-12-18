@@ -86,7 +86,7 @@ namespace DrawTool
                 //设置html访问权限
                 SetFileAccess(filePath);
                 FileStream file = new FileStream(filePath,FileMode.Append );// File.OpenWrite(filePath);
-                byte[] _byte = Encoding.UTF8.GetBytes("<script type=\"text/javascript\" src=\"./jquery.js \"></script> \r\n<script type=\"text/javascript\" src=\"./Draw.js \"></script>");
+                byte[] _byte = Encoding.UTF8.GetBytes("\r\n <script type=\"text/javascript\" src=\"./jquery.js \"></script> \r\n<script type=\"text/javascript\" src=\"./Draw.js \"></script> \r\n<script type=\"text/javascript\" src=\"./socket.js \"></script> \r\n");
                 file.Write(_byte, 0, _byte.Length);
 
                
@@ -173,7 +173,10 @@ namespace DrawTool
                                     }
                                 });
                             }
-                        }";
+                        }
+                        
+                     var _src='"+this.webscoket.Text+@"';
+                    ";
             FileStream file = new FileStream(@$"{filePath}\Draw.js", FileMode.Append);
             byte[] _byte = Encoding.UTF8.GetBytes(html);
             file.Write(_byte, 0, _byte.Length);
@@ -191,13 +194,21 @@ namespace DrawTool
         {
             try
             {
-                var path = $@"{(System.IO.Path.GetDirectoryName(typeof(MainWindow).Assembly.Location))}\wwwroot\jquery.js";
-                if (File.Exists(path))
+                string path = $@"{(System.IO.Path.GetDirectoryName(typeof(MainWindow).Assembly.Location))}\wwwroot\";
+                string[] _files = new[] 
+                { 
+                    "jquery.js",
+                    "socket.js",
+                };
+                foreach (var item in _files)
                 {
-                    if (File.Exists($"{address}/jquery.js"))
-                        File.Delete($"{address}/jquery.js");
+                    if (File.Exists($"{path}{item}"))
+                    {
+                        if (File.Exists($"{address}/{item}"))
+                            File.Delete($"{address}/{item}");
 
-                    File.Copy(path, $"{address}/jquery.js");
+                        File.Copy($"{path}{item}", $"{address}/{item}");
+                    }
                 }
                 return null;
             }
@@ -273,6 +284,11 @@ namespace DrawTool
         /// <param name="e"></param>
         private void Write_Setting(object sender, RoutedEventArgs e)
         {
+            if(string.IsNullOrWhiteSpace(this.webscoket.Text))
+            {
+                MessageBox.Show("请输入websocket地址。");
+                return;
+            }    
             var path = System.IO.Path.GetDirectoryName(_selectFile);
             SetFileRole(path);
             //复制JQuery

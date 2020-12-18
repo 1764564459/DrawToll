@@ -1,5 +1,7 @@
 var ws = null;
 var _src = null;
+
+//初始化websocket
 function InitWs() {
     if ("WebSocket" in window) {
         // 打开一个 web socket
