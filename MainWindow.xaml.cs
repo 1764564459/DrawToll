@@ -78,10 +78,10 @@ namespace DrawTool
                 drawJs.Close();
                 drawJs.Dispose();
                 //写入js
-                WriteDrawJs(path);
+                WriteDrawJs(path,setName);
 
                 //绑定需要绑的事件 
-                BindClickEvent(path, setName);
+                //BindClickEvent(path, setName);
 
                 //设置html访问权限
                 SetFileAccess(filePath);
@@ -103,74 +103,72 @@ namespace DrawTool
         /// <summary>
         /// 绑定事件
         /// </summary>
-        /// <param name="filePath"></param>
         /// <param name="element"></param>
-        private void BindClickEvent(string filePath,string element)
+        private string BindClickEvent(string element)
         {
             string[] _arr = element.Split(',');
             string _events = string.Empty;
             foreach (var item in _arr)
             {
-                _events += @"  
-                             var _elem=document.getElementById('"+item+ @"')
-                             if(_elem==null) return true;
-                             _elem.onclick=function (e) {
-                                        if(_bRst) return true;
-                                        
-                                        console.log('123')
-                                       _bRst=true;
-                              }  ";
+                _events += @"  var _"+item+ @"=$('body').contents().find('#"+item+ @"');
+                               if ( _" + item + @"!= null &&  _" + item + @" != 'undefined') 
+                               {
+                                    for (var i = 0; i <  _" + item + @".length; i++) 
+                                    {
+                                        _" + item + @"[i].onclick = function (e) 
+                                        {
+                                            alert('123')
+                                        }
+                                    }
+                               }  ";
             }
-            string _event = @" 
-                                document.onmousemove=function(e,f)
-                                {
-                                    
-                                    var _bRst=false;
-                                   " + _events+@"
-                                } ";
-            FileStream file = new FileStream(@$"{filePath}\Draw.js", FileMode.Append);
-            byte[] _byte = Encoding.UTF8.GetBytes(_event);
-            file.Write(_byte, 0, _byte.Length);
-            file.Close();
-            file.Dispose();
+            return _events;
         }
 
         /// <summary>
         /// 写入Js
         /// </summary>
         /// <param name="filePath"></param>
-        private void WriteDrawJs(string filePath)
+        private void WriteDrawJs(string filePath,string element)
         {
+            var _event = BindClickEvent(element);
             string html= @"
-                            var _idArr = [];
-                            $('body').contents().find('text,div,span').each(function () {
-                                var isBindedId = $(this).attr('isBindedId');
-                                if (!!isBindedId && isBindedId == 'True')
-                                {
-                                    _idArr.push($(this).attr('id'));
-                                    return true;
-                                }
-                                 var curObjId = $(this).html().replace(/\s+/g, '');
-                                 //验证ID是否正确
-                                if (curObjId == undefined || curObjId == '')
-                                    return true;
-                                var tempArr = curObjId.split('_');
-                                //if (tempArr.length < 2) return true;
-                                $(this).attr('id', curObjId);
-                                $(this).attr('isBindedId', 'True');
-                                _idArr.push(curObjId);
-                            });
-                        var _data = { water: '122', gas: '123', heat: '45621', fast: 125 };
-                        BindData(_data);
-                        function BindData(data)
-                        {
-                            $.each(data, function (index, item) {
-                                var current = $('body').contents().find('#' + index);
-                                if (current != null && current != 'undefined') {
-                                    current[0].textContent=item;
-                                }
-                            });
-                        } ";
+                            document.onmousemove=function(e,f)
+                            {
+                                "+_event+ @"
+                                var _idArr = [];
+                                $('body').contents().find('text,div,span').each(function () {
+                                    var isBindedId = $(this).attr('isBindedId');
+                                    if (!!isBindedId && isBindedId == 'True')
+                                    {
+                                        _idArr.push($(this).attr('id'));
+                                        return true;
+                                    }
+                                     var curObjId = $(this).html().replace(/\s+/g, '');
+                                     //验证ID是否正确
+                                    if (curObjId == undefined || curObjId == '')
+                                        return true;
+                                    var tempArr = curObjId.split('_');
+                                    //if (tempArr.length < 2) return true;
+                                    $(this).attr('id', curObjId);
+                                    $(this).attr('isBindedId', 'True');
+                                    _idArr.push(curObjId);
+                                });
+                            var _data = { water: '122', gas: '123', heat: '45621', fast: 125 };
+                            BindData(_data);
+                            function BindData(data)
+                            {
+                                $.each(data, function (index, item) {
+                                    var current = $('body').contents().find('#' + index);
+                                    if (current != null && current != 'undefined') {
+                                        for (var i = 0; i < current.length; i++)
+                                        {
+                                          current[i].textContent=item;
+                                        }
+                                    }
+                                });
+                            }
+                        }";
             FileStream file = new FileStream(@$"{filePath}\Draw.js", FileMode.Append);
             byte[] _byte = Encoding.UTF8.GetBytes(html);
             file.Write(_byte, 0, _byte.Length);
