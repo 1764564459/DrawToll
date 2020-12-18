@@ -106,10 +106,15 @@ namespace DrawTool
         /// <param name="element"></param>
         private string BindClickEvent(string element)
         {
+            element = element.Replace("，", ",").Replace("：",":");
             string[] _arr = element.Split(',');
             string _events = string.Empty;
             foreach (var item in _arr)
             {
+                string[] _send = item.Split(":");
+                string _msg = string.Empty;
+                if (_send.Length > 2)
+                    _msg = _send[1];
                 _events += @"  var _"+item+ @"=$('body').contents().find('#"+item+ @"');
                                if ( _" + item + @"!= null &&  _" + item + @" != 'undefined') 
                                {
